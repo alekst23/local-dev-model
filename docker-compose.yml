@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: local-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      # For GPU support, uncomment one:
+      # NVIDIA GPU:
+      # - NVIDIA_VISIBLE_DEVICES=all
+      # AMD GPU (ROCm):
+      # - HIP_VISIBLE_DEVICES=0
+    # For GPU support with Docker, uncomment:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # For AMD GPU (uncomment instead of nvidia above):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: amd
+    #           count: 1
+    #           capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - local-llm
+
+  proxy:
+    image: node:18-alpine
+    container_name: claude-ollama-proxy
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    environment:
+      OLLAMA_URL: "http://ollama:11434"
+      OLLAMA_MODEL: "mistral"
+      PROXY_PORT: "3000"
+    command: node claude-ollama-proxy.js
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - local-llm
+    # Alternative: use Python proxy
+    # image: python:3.11-alpine
+    # command: sh -c "pip install -r requirements.txt && python3 claude-ollama-proxy.py"
+
+  # Optional: Ollama WebUI for testing
+  ollama-webui:
+    image: ghcr.io/ollama-webui/ollama-webui:latest
+    container_name: ollama-webui
+    ports:
+      - "8080:8080"
+    environment:
+      OLLAMA_API_BASE_URL: "http://ollama:11434"
+    depends_on:
+      - ollama
+    networks:
+      - local-llm
+
+volumes:
+  ollama-data:
+
+networks:
+  local-llm:
+    driver: bridge

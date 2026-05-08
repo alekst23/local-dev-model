@@ -1,0 +1,26 @@
+{
+  "name": "local-llm-dev",
+  "version": "1.0.0",
+  "description": "Local LLM development with Ollama and Claude CLI",
+  "main": "claude-ollama-proxy.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node claude-ollama-proxy.js",
+    "proxy": "node claude-ollama-proxy.js",
+    "proxy:python": "python3 claude-ollama-proxy.py",
+    "health": "curl http://localhost:3000/health",
+    "models": "curl http://localhost:11434/api/tags"
+  },
+  "keywords": [
+    "ollama",
+    "claude",
+    "llm",
+    "local",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
