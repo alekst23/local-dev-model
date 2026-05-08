@@ -137,9 +137,7 @@ curl http://127.0.0.1:11434/api/tags
 ```bash
 # Check proxy logs for exact error
 # Restart proxy with debug logging
-DEBUG=* python3 claude-ollama-proxy.py
-# or
-NODE_DEBUG=http node claude-ollama-proxy.js
+UV_LOG_CONTEXT=1 uv run ollama-proxy
 
 # Verify Ollama is running and accessible
 curl http://localhost:11434/api/tags
@@ -149,7 +147,7 @@ echo $OLLAMA_URL
 # Should be: http://localhost:11434
 
 # Try explicit URL
-OLLAMA_URL=http://127.0.0.1:11434 python3 claude-ollama-proxy.py
+OLLAMA_URL=http://127.0.0.1:11434 uv run ollama-proxy
 
 # If using Docker, Ollama URL should be http://ollama:11434
 # (the service name, not localhost)
@@ -167,13 +165,13 @@ curl http://localhost:3000/health
 # Should return: {"status": "ok", "model": "mistral", ...}
 
 # Check environment variables
-echo $CLAUDE_API_URL
-echo $CLAUDE_API_KEY
+echo $ANTHROPIC_BASE_URL
+echo $ANTHROPIC_API_KEY
 # Should be: http://localhost:3000 and local
 
 # Set them if not set
-export CLAUDE_API_URL=http://localhost:3000
-export CLAUDE_API_KEY=local
+export ANTHROPIC_BASE_URL=http://localhost:3000
+export ANTHROPIC_API_KEY=local
 
 # Test with curl
 curl http://localhost:3000/v1/chat/completions \
@@ -229,7 +227,7 @@ ollama serve
 
 # Then update proxy config
 export OLLAMA_URL=http://localhost:11435
-python3 claude-ollama-proxy.py
+uv run ollama-proxy
 ```
 
 **For Port 3000 (Proxy):**
@@ -242,10 +240,10 @@ kill -9 <PID>
 
 # Or use different port
 export PROXY_PORT=3001
-python3 claude-ollama-proxy.py
+uv run ollama-proxy
 
-# Update Claude CLI config
-export CLAUDE_API_URL=http://localhost:3001
+# Update Claude Code CLI config
+export ANTHROPIC_BASE_URL=http://localhost:3001
 ```
 
 ### 9. Model Takes Too Long to Load/Generate
@@ -376,12 +374,12 @@ If issues persist:
 ☐ Ollama installed and running (ollama serve)
 ☐ Model pulled (ollama pull mistral)
 ☐ API accessible (curl http://localhost:11434/api/tags)
-☐ Proxy running (python3 claude-ollama-proxy.py)
+☐ Proxy running (uv run ollama-proxy)
 ☐ Proxy accessible (curl http://localhost:3000/health)
 ☐ Claude CLI installed
 ☐ Environment variables set:
-  ☐ export CLAUDE_API_URL=http://localhost:3000
-  ☐ export CLAUDE_API_KEY=local
+  ☐ export ANTHROPIC_BASE_URL=http://localhost:3000
+  ☐ export ANTHROPIC_API_KEY=local
 ☐ Test with claude command
 ```
 

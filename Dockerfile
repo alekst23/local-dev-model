@@ -1,22 +1,13 @@
-# Dockerfile for Claude Ollama Proxy
-
-# Build stage for Node.js proxy
-FROM node:18-alpine as node-proxy
+# Dockerfile for Claude Ollama Proxy (Python + uv)
+FROM python:3.11-alpine
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY claude-ollama-proxy.js .
-EXPOSE 3000
-CMD ["node", "claude-ollama-proxy.js"]
+RUN pip install --no-cache-dir uv
 
-# Runtime stage with Python proxy option
-FROM python:3.11-alpine as python-proxy
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY claude-ollama-proxy.py .
-EXPOSE 3000
-CMD ["python3", "claude-ollama-proxy.py"]
+COPY pyproject.toml ./
+COPY README.md ./
+COPY src ./src
 
-# Default to Node.js proxy
-FROM node-proxy as final
+RUN uv sync
+
+EXPOSE 3000
+CMD ["uv", "run", "ollama-proxy"]

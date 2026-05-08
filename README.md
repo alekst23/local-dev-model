@@ -5,7 +5,7 @@ This setup allows you to run open-source LLMs locally using Ollama and integrate
 ## Architecture
 
 - **Ollama**: Runs LLM models locally with an OpenAI-compatible API
-- **Local Proxy/Wrapper**: Routes Claude CLI requests to your local Ollama instance
+- **Local Proxy App (Python + uv)**: Routes Claude CLI requests to your local Ollama instance
 - **Claude CLI**: Standard CLI tool configured to use local model
 
 ## Prerequisites
@@ -66,27 +66,43 @@ npm install -g claude-cli
 # or pip install claude-cli (Python version)
 ```
 
-### 5. Configure Claude CLI for Local Model
+### 5. Install uv and Sync Dependencies
 
-Create a wrapper script or configure an API proxy. See `claude-ollama-proxy.js` for the Node.js wrapper approach.
+```bash
+# Install uv (Linux/macOS)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Sync project dependencies from pyproject.toml
+uv sync
+```
+
+### 6. Configure Claude CLI for Local Model
+
+The Python proxy now lives in a mini app/module under src/ollama_proxy and is launched with uv.
 
 ## Usage
 
-### Option A: Using the Proxy Wrapper (Recommended)
+### Option A: Run the Proxy App (Recommended)
 
 ```bash
 # Start the proxy
-node claude-ollama-proxy.js
+uv run ollama-proxy
 
-# In another terminal, configure Claude CLI
-export CLAUDE_API_URL=http://localhost:3000
-export CLAUDE_API_KEY=local
+# In another terminal, configure Claude Code CLI
+export ANTHROPIC_BASE_URL=http://localhost:3000
+export ANTHROPIC_API_KEY=local
 
 # Use Claude CLI normally
 claude "What is machine learning?"
 ```
 
-### Option B: Direct Ollama Integration
+### Option B: Run as a Python Module
+
+```bash
+uv run python -m ollama_proxy
+```
+
+### Option C: Direct Ollama Integration
 
 Use Ollama's OpenAI-compatible API directly with tools that support custom endpoints.
 

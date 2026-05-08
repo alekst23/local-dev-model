@@ -49,48 +49,43 @@ Expected responses:
 - Tags returns list of installed models
 - Show returns model details
 
-### 5. Set Up Python Proxy (Option A)
+### 5. Set Up Python Proxy App (Option A)
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Install uv and project dependencies
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
 
 # Start the proxy
-python3 claude-ollama-proxy.py
+uv run ollama-proxy
 ```
 
 Expected output:
 ```
-🚀 Claude CLI Proxy for Ollama (Python)
-📡 Ollama URL: http://localhost:11434
-🤖 Model: mistral
-🔌 Proxy running on: http://localhost:3000
+Starting Ollama proxy
+Ollama URL: http://localhost:11434
+Model: mistral
+Proxy URL: http://127.0.0.1:3000
 
-📝 Configure Claude CLI:
-  export CLAUDE_API_URL=http://localhost:3000
-  export CLAUDE_API_KEY=local
-
-✅ Proxy starting...
+Configure Claude CLI:
+  export ANTHROPIC_BASE_URL=http://localhost:3000
+  export ANTHROPIC_API_KEY=local
 ```
 
 **Keep this terminal open.** In a new terminal, proceed with Step 6.
 
-### 5B. Set Up Node.js Proxy (Option B, Alternative to 5)
+### 5B. Alternative Start (Python Module)
 
 ```bash
-# Install dependencies (optional)
-npm install
-
-# Start the proxy
-node claude-ollama-proxy.js
+uv run python -m ollama_proxy
 ```
 
 Expected output:
 ```
-🚀 Claude CLI Proxy for Ollama
-📡 Ollama URL: http://localhost:11434
-🤖 Model: mistral
-🔌 Proxy running on: http://localhost:3000
+Starting Ollama proxy
+Ollama URL: http://localhost:11434
+Model: mistral
+Proxy URL: http://127.0.0.1:3000
 ```
 
 ### 6. Test the Proxy
@@ -130,8 +125,8 @@ npm install -g claude-cli
 # or: pip install claude-cli
 
 # Configure for local model
-export CLAUDE_API_URL=http://localhost:3000
-export CLAUDE_API_KEY=local
+export ANTHROPIC_BASE_URL=http://localhost:3000
+export ANTHROPIC_API_KEY=local
 
 # Test it!
 claude "What is machine learning?"
@@ -176,7 +171,7 @@ curl http://localhost:11434/api/tags
 
 # Check proxy logs for specific error
 # Restart proxy with correct OLLAMA_URL
-OLLAMA_URL=http://localhost:11434 python3 claude-ollama-proxy.py
+OLLAMA_URL=http://localhost:11434 uv run ollama-proxy
 ```
 
 ### Claude CLI not finding proxy
@@ -186,8 +181,8 @@ OLLAMA_URL=http://localhost:11434 python3 claude-ollama-proxy.py
 curl http://localhost:3000/health
 
 # Check environment variables
-echo $CLAUDE_API_URL
-echo $CLAUDE_API_KEY
+echo $ANTHROPIC_BASE_URL
+echo $ANTHROPIC_API_KEY
 
 # Should output:
 # http://localhost:3000

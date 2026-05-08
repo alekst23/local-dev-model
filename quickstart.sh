@@ -31,6 +31,20 @@ fi
 
 echo -e "${GREEN}✓${NC} Ollama is installed"
 
+# Check if uv is installed
+if ! command -v uv &> /dev/null; then
+    echo -e "${YELLOW}⚠️  uv is not installed${NC}"
+    echo ""
+    echo "Install it from: https://docs.astral.sh/uv/getting-started/installation/"
+    echo ""
+    echo "Quick install (Linux/macOS):"
+    echo "  curl -LsSf https://astral.sh/uv/install.sh | sh"
+    echo ""
+    exit 1
+fi
+
+echo -e "${GREEN}✓${NC} uv is installed"
+
 # Check if Ollama service is running
 if ! curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
     echo -e "${YELLOW}⚠️  Ollama service is not running${NC}"
@@ -80,10 +94,10 @@ echo ""
 if ! command -v claude &> /dev/null; then
     echo -e "${YELLOW}⚠️  Claude CLI is not installed${NC}"
     echo ""
-    echo "Install it with:"
+    echo "Install it with one of:"
     echo "  npm install -g claude-cli"
-    echo "  # or for Python:"
-    echo "  pip install claude-cli"
+    echo "  # or"
+    echo "  uv tool install claude-cli"
     echo ""
 fi
 
@@ -110,22 +124,18 @@ fi
 echo "🚀 Starting Claude Ollama Proxy"
 echo "Model: $OLLAMA_MODEL"
 echo ""
-echo "Configure Claude CLI with:"
-echo "  export CLAUDE_API_URL=http://localhost:3000"
-echo "  export CLAUDE_API_KEY=local"
+echo "Configure Claude Code CLI with:"
+echo "  export ANTHROPIC_BASE_URL=http://localhost:3000"
+echo "  export ANTHROPIC_API_KEY=local"
 echo ""
 
-# Determine which proxy to run
-if command -v node &> /dev/null; then
-    echo "Using Node.js proxy..."
-    node claude-ollama-proxy.js
-elif command -v python3 &> /dev/null; then
-    echo "Using Python proxy..."
-    python3 claude-ollama-proxy.py
-else
-    echo "Error: Neither Node.js nor Python 3 found!"
+if ! command -v uv &> /dev/null; then
+    echo "Error: uv is required but not installed"
     exit 1
 fi
+
+echo "Using uv package launcher..."
+uv run ollama-proxy
 EOF
 
 chmod +x run-proxy.sh
@@ -141,9 +151,9 @@ echo ""
 echo "1️⃣  Start the proxy in one terminal:"
 echo "   ./run-proxy.sh"
 echo ""
-echo "2️⃣  In another terminal, configure Claude CLI:"
-echo "   export CLAUDE_API_URL=http://localhost:3000"
-echo "   export CLAUDE_API_KEY=local"
+echo "2️⃣  In another terminal, configure Claude Code CLI:"
+echo "   export ANTHROPIC_BASE_URL=http://localhost:3000"
+echo "   export ANTHROPIC_API_KEY=local"
 echo ""
 echo "3️⃣  Test it:"
 echo "   claude 'What is machine learning?'"

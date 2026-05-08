@@ -39,7 +39,7 @@ services:
       - local-llm
 
   proxy:
-    image: node:18-alpine
+    image: python:3.11-alpine
     container_name: claude-ollama-proxy
     working_dir: /app
     volumes:
@@ -50,15 +50,12 @@ services:
       OLLAMA_URL: "http://ollama:11434"
       OLLAMA_MODEL: "mistral"
       PROXY_PORT: "3000"
-    command: node claude-ollama-proxy.js
+    command: sh -c "pip install --no-cache-dir uv && uv sync && uv run ollama-proxy"
     depends_on:
       ollama:
         condition: service_healthy
     networks:
       - local-llm
-    # Alternative: use Python proxy
-    # image: python:3.11-alpine
-    # command: sh -c "pip install -r requirements.txt && python3 claude-ollama-proxy.py"
 
   # Optional: Ollama WebUI for testing
   ollama-webui:

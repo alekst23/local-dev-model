@@ -10,6 +10,11 @@ venv/
 .venv
 pip-log.txt
 pip-delete-this-directory.txt
+*.egg-info/
+*.egg
+build/
+dist/
+pip-wheel-metadata/
 
 # IDE
 .vscode/
