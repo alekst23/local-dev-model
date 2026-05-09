@@ -106,6 +106,52 @@ uv run python -m ollama_proxy
 
 Use Ollama's OpenAI-compatible API directly with tools that support custom endpoints.
 
+### Option D: Claude Code via Ollama Launch (No Proxy)
+
+If you want Claude Code to run against a local Ollama model directly, you can use Ollama's built-in integration launcher.
+
+1. Ensure Ollama is running.
+
+```bash
+# If using systemd service (common on Linux)
+sudo systemctl status ollama
+
+# If not using service, run manually in one terminal
+ollama serve
+```
+
+Note: if you see "bind: address already in use", Ollama is already running on port 11434. In that case, do not start another ollama serve process.
+
+2. Pull a coding model.
+
+```bash
+ollama pull qwen2.5-coder:latest
+```
+
+3. Configure and launch Claude Code with the local model.
+
+```bash
+ollama launch claude --config --model qwen2.5-coder:latest -y
+claude
+```
+
+4. Verify local runtime health.
+
+```bash
+ollama ps
+nvidia-smi
+```
+
+If generation is very slow and ollama ps shows CPU processing, your local Ollama runtime is likely not using GPU acceleration.
+
+5. Optional: store Ollama models on a larger disk.
+
+```bash
+export OLLAMA_MODELS=/media/aleks/data2/ollama-models
+mkdir -p "$OLLAMA_MODELS"
+ollama pull qwen2.5-coder:latest
+```
+
 ## Model Recommendations
 
 | Model | Size | Speed | Quality | VRAM |
