@@ -210,9 +210,9 @@ def _non_streaming_completion(
                 }
             ],
             "usage": {
-                "prompt_tokens": len(prompt) // 4,
-                "completion_tokens": len(assistant_text) // 4,
-                "total_tokens": (len(prompt) + len(assistant_text)) // 4,
+                "prompt_tokens": ollama_response.get("prompt_eval_count", 0),
+                "completion_tokens": ollama_response.get("eval_count", 0),
+                "total_tokens": ollama_response.get("prompt_eval_count", 0) + ollama_response.get("eval_count", 0),
             },
         }
         return jsonify(payload)
@@ -313,8 +313,8 @@ def _non_streaming_anthropic_completion(
             "stop_reason": "end_turn",
             "stop_sequence": None,
             "usage": {
-                "input_tokens": len(prompt) // 4,
-                "output_tokens": len(assistant_text) // 4,
+                "input_tokens": ollama_response.get("prompt_eval_count", 0),
+                "output_tokens": ollama_response.get("eval_count", 0),
             },
         }
         return jsonify(payload)
@@ -334,6 +334,7 @@ def _stream_anthropic_response(
     """Stream a response shaped like Anthropic's SSE format."""
     def generate():
         msg_id = f"msg_{int(datetime.now().timestamp() * 1000)}"
+        input_tokens = 0
         output_tokens = 0
         # Opening events expected by Claude Code
         yield f"event: message_start\ndata: {json.dumps({'type': 'message_start', 'message': {'id': msg_id, 'type': 'message', 'role': 'assistant', 'content': [], 'model': ollama_model, 'stop_reason': None, 'stop_sequence': None, 'usage': {'input_tokens': 0, 'output_tokens': 0}}})}\n\n"
@@ -368,19 +369,22 @@ def _stream_anthropic_response(
 
                 token = json_data.get("response")
                 if token:
-                    output_tokens += max(1, len(token) // 4)
                     delta = {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": token}}
                     yield f"event: content_block_delta\ndata: {json.dumps(delta)}\n\n"
 
+                if json_data.get("done"):
+                    input_tokens = json_data.get("prompt_eval_count", 0)
+                    output_tokens = json_data.get("eval_count", 0)
+
             yield f"event: content_block_stop\ndata: {json.dumps({'type': 'content_block_stop', 'index': 0})}\n\n"
-            yield f"event: message_delta\ndata: {json.dumps({'type': 'message_delta', 'delta': {'stop_reason': 'end_turn', 'stop_sequence': None}, 'usage': {'output_tokens': output_tokens}})}\n\n"
+            yield f"event: message_delta\ndata: {json.dumps({'type': 'message_delta', 'delta': {'stop_reason': 'end_turn', 'stop_sequence': None}, 'usage': {'input_tokens': input_tokens, 'output_tokens': output_tokens}})}\n\n"
             yield f"event: message_stop\ndata: {json.dumps({'type': 'message_stop'})}\n\n"
 
         except Exception as err:
             _log(f"anthropic streaming error: {err}")
             yield f"event: error\ndata: {json.dumps({'type': 'error', 'error': {'type': 'api_error', 'message': str(err)}})}\n\n"
             yield f"event: content_block_stop\ndata: {json.dumps({'type': 'content_block_stop', 'index': 0})}\n\n"
-            yield f"event: message_delta\ndata: {json.dumps({'type': 'message_delta', 'delta': {'stop_reason': 'error', 'stop_sequence': None}, 'usage': {'output_tokens': output_tokens}})}\n\n"
+            yield f"event: message_delta\ndata: {json.dumps({'type': 'message_delta', 'delta': {'stop_reason': 'error', 'stop_sequence': None}, 'usage': {'input_tokens': input_tokens, 'output_tokens': output_tokens}})}\n\n"
             yield f"event: message_stop\ndata: {json.dumps({'type': 'message_stop'})}\n\n"
 
     return Response(generate(), mimetype="text/event-stream")

@@ -1,7 +1,7 @@
 # T-001-4: Report real token usage from Ollama counts
 
 **Epic**: EPIC-001 (OpenAI/Anthropic-compatible proxy correctness)
-**Status**: Open
+**Status**: Done
 **Depends on**: —
 **Blocks**: T-001-5
 
