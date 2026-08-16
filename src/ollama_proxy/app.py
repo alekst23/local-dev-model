@@ -47,12 +47,13 @@ def create_app(
             ollama_models = response.json().get("models", [])
             data = [
                 {
-                    "id": m["name"],
+                    "id": m.get("name", ""),
                     "object": "model",
                     "owned_by": "ollama",
                     "permission": [],
                 }
                 for m in ollama_models
+                if m.get("name")
             ]
         except Exception as err:
             _log(f"models list error: {err}")
