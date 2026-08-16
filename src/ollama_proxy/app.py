@@ -163,8 +163,10 @@ def _bound_max_tokens(max_tokens: int) -> int:
     try:
         requested = int(max_tokens)
     except (TypeError, ValueError):
-        return 256
-    return max(1, min(requested, 256))
+        return 2048
+    if requested <= 0:
+        return 2048
+    return requested
 
 
 def _non_streaming_completion(
