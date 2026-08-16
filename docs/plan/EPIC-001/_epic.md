@@ -25,11 +25,11 @@ they would against a real API endpoint.
 
 | # | Ticket | Title | Depends On | Status |
 |---|--------|-------|------------|--------|
-| 1 | T-001-1 | Honor requested `max_tokens` (remove 256 hard cap) | — | Open |
-| 2 | T-001-2 | Correct multi-role prompt construction (system/user/assistant) | — | Open |
-| 3 | T-001-3 | Honor per-request `model` selection | — | Open |
-| 4 | T-001-4 | Report real token usage from Ollama counts | — | Open |
-| 5 | T-001-5 | Integration verification + docs update | T-001-1, T-001-2, T-001-3, T-001-4 | Open |
+| 1 | T-001-1 | Honor requested `max_tokens` (remove 256 hard cap) | — | Done |
+| 2 | T-001-2 | Correct multi-role prompt construction (system/user/assistant) | — | Done |
+| 3 | T-001-3 | Honor per-request `model` selection | — | Done |
+| 4 | T-001-4 | Report real token usage from Ollama counts | — | Done |
+| 5 | T-001-5 | Integration verification + docs update | T-001-1, T-001-2, T-001-3, T-001-4 | Done |
 
 ## Dependency Graph
 
