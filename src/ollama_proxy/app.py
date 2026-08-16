@@ -41,19 +41,23 @@ def create_app(
 
     @app.route("/v1/models", methods=["GET"])
     def models():
-        return jsonify(
-            {
-                "object": "list",
-                "data": [
-                    {
-                        "id": app.config["OLLAMA_MODEL"],
-                        "object": "model",
-                        "owned_by": "ollama",
-                        "permission": [],
-                    }
-                ],
-            }
-        )
+        try:
+            response = requests.get(f"{app.config['OLLAMA_URL']}/api/tags", timeout=10)
+            response.raise_for_status()
+            ollama_models = response.json().get("models", [])
+            data = [
+                {
+                    "id": m["name"],
+                    "object": "model",
+                    "owned_by": "ollama",
+                    "permission": [],
+                }
+                for m in ollama_models
+            ]
+        except Exception as err:
+            _log(f"models list error: {err}")
+            return jsonify({"error": str(err)}), 503
+        return jsonify({"object": "list", "data": data})
 
     @app.route("/v1/chat/completions", methods=["POST"])
     def chat_completion():
@@ -63,13 +67,14 @@ def create_app(
             stream = data.get("stream", False)
             temperature = data.get("temperature", 0.7)
             max_tokens = data.get("max_tokens", 2048)
+            ollama_model = data.get("model") or app.config["OLLAMA_MODEL"]
 
             prompt = _messages_to_prompt(messages)
 
             if stream:
                 return _stream_ollama_response(
                     ollama_url=app.config["OLLAMA_URL"],
-                    ollama_model=app.config["OLLAMA_MODEL"],
+                    ollama_model=ollama_model,
                     prompt=prompt,
                     temperature=temperature,
                     max_tokens=max_tokens,
@@ -77,7 +82,7 @@ def create_app(
 
             return _non_streaming_completion(
                 ollama_url=app.config["OLLAMA_URL"],
-                ollama_model=app.config["OLLAMA_MODEL"],
+                ollama_model=ollama_model,
                 prompt=prompt,
                 temperature=temperature,
                 max_tokens=max_tokens,
@@ -95,13 +100,14 @@ def create_app(
             stream = data.get("stream", False)
             temperature = data.get("temperature", 0.7)
             max_tokens = data.get("max_tokens", 2048)
+            ollama_model = data.get("model") or app.config["OLLAMA_MODEL"]
 
             prompt = _messages_to_prompt(messages)
 
             if stream:
                 return _stream_anthropic_response(
                     ollama_url=app.config["OLLAMA_URL"],
-                    ollama_model=app.config["OLLAMA_MODEL"],
+                    ollama_model=ollama_model,
                     prompt=prompt,
                     temperature=temperature,
                     max_tokens=max_tokens,
@@ -109,7 +115,7 @@ def create_app(
 
             return _non_streaming_anthropic_completion(
                 ollama_url=app.config["OLLAMA_URL"],
-                ollama_model=app.config["OLLAMA_MODEL"],
+                ollama_model=ollama_model,
                 prompt=prompt,
                 temperature=temperature,
                 max_tokens=max_tokens,

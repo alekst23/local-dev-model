@@ -1,7 +1,7 @@
 # T-001-3: Honor per-request `model` selection
 
 **Epic**: EPIC-001 (OpenAI/Anthropic-compatible proxy correctness)
-**Status**: Open
+**Status**: Done
 **Depends on**: —
 **Blocks**: T-001-5
 
