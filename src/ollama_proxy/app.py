@@ -153,7 +153,12 @@ def _messages_to_prompt(messages: list[dict[str, Any]]) -> str:
     for message in messages:
         role = message.get("role", "user")
         content = message.get("content", "")
-        speaker = "User" if role == "user" else "Assistant"
+        if role == "system":
+            speaker = "System"
+        elif role == "assistant":
+            speaker = "Assistant"
+        else:
+            speaker = "User"
         lines.append(f"{speaker}: {content}")
     lines.append("Assistant:")
     return "\n".join(lines)

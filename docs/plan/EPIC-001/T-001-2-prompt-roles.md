@@ -1,7 +1,7 @@
 # T-001-2: Correct multi-role prompt construction (system/user/assistant)
 
 **Epic**: EPIC-001 (OpenAI/Anthropic-compatible proxy correctness)
-**Status**: Open
+**Status**: Done
 **Depends on**: —
 **Blocks**: T-001-5
 
