@@ -1,7 +1,7 @@
 # T-001-5: Integration verification + docs update
 
 **Epic**: EPIC-001 (OpenAI/Anthropic-compatible proxy correctness)
-**Status**: Open
+**Status**: Done
 **Depends on**: T-001-1, T-001-2, T-001-3, T-001-4
 **Blocks**: —
 

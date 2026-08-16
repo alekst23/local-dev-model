@@ -152,6 +152,69 @@ mkdir -p "$OLLAMA_MODELS"
 ollama pull qwen2.5-coder:latest
 ```
 
+## API Usage
+
+The proxy exposes two API shapes — OpenAI-compatible (`/v1/chat/completions`) and
+Anthropic-compatible (`/v1/messages`) — both backed by your local Ollama instance.
+
+### max_tokens
+
+- If omitted, the proxy defaults to **2048** tokens.
+- If provided, the requested value is passed through to Ollama with no artificial ceiling.
+- Example: `"max_tokens": 4096` will allow up to 4096 tokens of generation.
+
+### model selection
+
+- Pass `"model"` in the request body to use any model Ollama has available.
+- If omitted, the proxy falls back to the model set at startup via `--model` or
+  the `OLLAMA_MODEL` environment variable.
+- `GET /v1/models` returns all models Ollama currently has loaded (proxies
+  `/api/tags`), not just the default model.
+
+### message roles
+
+All three standard roles are correctly mapped in the prompt sent to Ollama:
+
+| Role | Prompt prefix |
+|------|---------------|
+| `system` | `System:` |
+| `user` | `User:` |
+| `assistant` | `Assistant:` |
+
+### token usage
+
+Responses include actual token counts from Ollama (`prompt_eval_count` /
+`eval_count`), not estimates.
+
+- **OpenAI shape**: `usage.prompt_tokens` / `usage.completion_tokens`
+- **Anthropic shape**: `usage.input_tokens` / `usage.output_tokens`
+
+Streaming Anthropic responses capture counts from Ollama's final `"done": true`
+chunk and report them in the `message_delta` usage event.
+
+### Example: OpenAI library
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:3000/v1",
+    api_key="local",  # any non-empty string
+)
+
+response = client.chat.completions.create(
+    model="qwen2.5-coder:latest",   # any model Ollama has pulled
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Explain what a Python generator is."},
+    ],
+    max_tokens=1024,
+)
+
+print(response.choices[0].message.content)
+print("tokens used:", response.usage.completion_tokens)
+```
+
 ## Model Recommendations
 
 | Model | Size | Speed | Quality | VRAM |
